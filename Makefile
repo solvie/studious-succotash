@@ -7,5 +7,5 @@ test:
 	python3 -m unittest -v test/*.py
 
 run: 
-	python3 src/q_test_script.py
+	python3 -m src.dash
 	
