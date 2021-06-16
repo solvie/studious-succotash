@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
+from dash.dependencies import Input, Output
 
 x = ['A', 'B', 'C', 'D', 'E']
 y = ['W', 'X', 'Y', 'Z']
@@ -18,7 +19,6 @@ for n, row in enumerate(z):
         annotations.append(dict(text=str(z[n][m]), x=x[m], y=y[n],
                             xref='x1', yref='y1', showarrow=False))
 
-
 colorscale = [[0, '#3D9970'], [1, '#001f3f']]  # custom colorscale
 trace = go.Heatmap(
     x=x, 
@@ -34,26 +34,52 @@ trace = go.Heatmap(
 )
 
 fig = go.Figure(
-    data=trace,
+    data=trace
 )
 fig['layout'].update(
     title="Annotated Heatmap",
     xaxis=dict(title='something'),
     yaxis=dict(title='another thing'),
-    annotations=annotations,
-    width=700,
-    height=700,
-    autosize=False
+    annotations=annotations
 )
 
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
     html.P("Medals included:"),
+    dcc.Checklist(
+        id='annotations',
+        options=[{'label': 'annotations', 'value': 'true'}],
+        value=['bar']
+    ),
     dcc.Graph(
-        id="graph",
-        figure=fig
+        id="graph"
     )
 ])
 
-app.run_server(debug=True)
+@app.callback(
+    Output("graph", "figure"), 
+    [Input("annotations", "value")])
+def filter_heatmap(annot_value):
+    print('cols')
+    print(annot_value)
+    fig = go.Figure(
+        data=trace
+    )
+    if len(annot_value) == 2:
+        fig['layout'].update(
+            title="Annotated Heatmap",
+            xaxis=dict(title='something'),
+            yaxis=dict(title='another thing'),
+            annotations=annotations
+        )
+    else:
+        fig['layout'].update(
+            title="Annotated Heatmap",
+            xaxis=dict(title='something'),
+            yaxis=dict(title='another thing'),
+        )
+    return fig
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
